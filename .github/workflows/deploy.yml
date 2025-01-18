@@ -1,38 +1,39 @@
-name: Deploy
+name: Deploy to Server
 
 on:
   push:
     branches:
+      - main
       - develop
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout del código
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Crear archivo de clave SSH
+      - name: Set up SSH
         run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/deploy_key
-          chmod 600 /tmp/deploy_key
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Crear directorio remoto
-        run: ssh -o StrictHostKeyChecking=no -i /tmp/deploy_key ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p /var/www/my-car"
-
-      - name: Desplegar archivos al servidor
+      - name: Create project directory on server
         run: |
-          rsync -avz -e "ssh -o StrictHostKeyChecking=no -i /tmp/deploy_key" \
-          ./ \
-          ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/my-car
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p /var/www/my-car"
 
-      - name: Ejecutar Docker Compose
+      - name: Copy files to server
         run: |
-          ssh -o StrictHostKeyChecking=no -i /tmp/deploy_key ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" \
+            ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/my-car
+
+      - name: Run docker-compose on server
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
           cd /var/www/my-car &&
           docker-compose down &&
-          docker-compose up -d --build
-          "
-
-      - name: Limpiar clave SSH
-        run: rm -f /tmp/deploy_key
+          docker-compose build &&
+          docker-compose up -d"
