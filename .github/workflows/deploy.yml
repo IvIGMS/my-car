@@ -21,7 +21,7 @@ jobs:
       - name: Copy files to server
         run: |
           rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
-          ./ root@<ip_servidor>:/var/www/my-car
+          ./ root@164.90.162.202:/var/www/my-car
 
       - name: Start Docker Compose
         run: |
