@@ -41,7 +41,7 @@ services:
     depends_on:
       - zookeeper
     ports:
-      - "9092:9092"
+      - "9092:9090"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -63,7 +63,7 @@ services:
       - kafka
     environment:
       KAFKA_TOPIC_NAME: B2N-topic
-      KAFKA_URL: kafka:9092
+      KAFKA_URL: kafka:9090
       SPRING_PROFILES_ACTIVE: local
       DATABASE_URL: jdbc:postgresql://db-business:5432/mycar-business
       DATABASE_USER: postgres
@@ -80,7 +80,7 @@ services:
       - db-notifications
     environment:
       KAFKA_TOPIC_NAME: B2N-topic
-      KAFKA_URL: kafka:9092
+      KAFKA_URL: kafka:9090
       SPRING_PROFILES_ACTIVE: local
       DATABASE_URL: jdbc:postgresql://db-notifications:5432/mycar-notifications
       DATABASE_USER: postgres

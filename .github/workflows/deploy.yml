@@ -1,0 +1,32 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Copy files to server
+        run: |
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
+          ./ root@<ip_servidor>:/var/www/my-car
+
+      - name: Start Docker Compose
+        run: |
+          ssh -o StrictHostKeyChecking=no root@164.90.162.202 << 'EOF'
+          cd /var/www/my-car
+          docker-compose down
+          docker-compose up -d
+          EOF
