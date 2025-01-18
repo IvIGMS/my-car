@@ -8,15 +8,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
+      - name: Checkout del código
         uses: actions/checkout@v3
-
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Crear archivo de clave SSH
         run: |
@@ -32,10 +26,5 @@ jobs:
           ./target/ \
           ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/my-car
 
-      - name: Start Docker Compose
-        run: |
-          ssh -o StrictHostKeyChecking=no root@164.90.162.202 << 'EOF'
-          cd /var/www/my-car
-          docker-compose down
-          docker-compose up -d
-          EOF
+      - name: Limpiar clave SSH
+        run: rm -f /tmp/deploy_key
