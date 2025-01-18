@@ -8,14 +8,23 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H 164.90.162.202 >> ~/.ssh/known_hosts
+
+      - name: Upload Code to Server
+        run: |
+          rsync -avz -e "ssh -i ~/.ssh/id_rsa" \
+          ./ root@164.90.162.202:/var/www/my-car/
 
       - name: Deploy Application
         run: |
