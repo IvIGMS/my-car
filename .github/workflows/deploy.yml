@@ -1,10 +1,10 @@
-name: Deploy to Server
+name: Deploy
 
 on:
   push:
     branches:
       - develop
-  workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -23,8 +23,16 @@ jobs:
       - name: Desplegar archivos al servidor
         run: |
           rsync -avz -e "ssh -o StrictHostKeyChecking=no -i /tmp/deploy_key" \
-          ./target/ \
+          ./ \
           ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/my-car
+
+      - name: Ejecutar Docker Compose
+        run: |
+          ssh -o StrictHostKeyChecking=no -i /tmp/deploy_key ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+          cd /var/www/my-car &&
+          docker-compose down &&
+          docker-compose up -d --build
+          "
 
       - name: Limpiar clave SSH
         run: rm -f /tmp/deploy_key
