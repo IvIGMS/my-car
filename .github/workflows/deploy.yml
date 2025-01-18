@@ -10,29 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        run: echo "Hola desde la maquina de github actions"
-#        uses: actions/checkout@v3
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 164.90.162.202 >> ~/.ssh/known_hosts
 
-#      - name: Set up SSH
-#        run: |
-#          mkdir -p ~/.ssh
-#          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-#          chmod 600 ~/.ssh/id_rsa
-#          ssh-keyscan -t rsa ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-#
-#      - name: Create project directory on server
-#        run: |
-#          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p /var/www/my-car"
-#
-#      - name: Copy files to server
-#        run: |
-#          rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/my-car
-#
-#      - name: Run docker-compose on server
-#        run: |
-#          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
-#          cd /var/www/my-car &&
-#          docker-compose down &&
-#          docker-compose build &&
-#          docker-compose up -d"
+      - name: Deploy Application
+        run: |
+          ssh -i ~/.ssh/id_rsa root@164.90.162.202 "
+          cd /var/www/my-car &&
+          docker-compose down &&
+          docker-compose up -d --build
+          "
