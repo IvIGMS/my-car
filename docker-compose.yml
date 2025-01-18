@@ -68,7 +68,7 @@ services:
       DATABASE_URL: jdbc:postgresql://db-business:5432/mycar-business
       DATABASE_USER: postgres
       DATABASE_PASSWORD: postgres
-      SQL_INIT_MODE: never
+      SQL_INIT_MODE: always
 
   notifications:
     build:
