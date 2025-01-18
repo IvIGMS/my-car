@@ -21,10 +21,14 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H 164.90.162.202 >> ~/.ssh/known_hosts
 
+      - name: Ensure Target Directory Exists
+        run: |
+          ssh -i ~/.ssh/id_rsa root@164.90.162.202 "mkdir -p /var/www/my-car"
+
       - name: Upload Code to Server
         run: |
-          rsync -avz -e "ssh -i ~/.ssh/id_rsa" \
-          ./ root@164.90.162.202:/var/www/my-car/
+          ssh -i ~/.ssh/id_rsa root@164.90.162.202 "mkdir -p /var/www/my-car" # Crear el directorio si no existe
+          rsync -avz -e "ssh -i ~/.ssh/id_rsa" ./ root@164.90.162.202:/var/www/my-car/
 
       - name: Deploy Application
         run: |
